@@ -5,17 +5,17 @@ library(ggplot2)
 
 ## Define function
 
-#' Plot Coverage from BED Files to PDF
+#' Plot Depth from BED Files to PDF
 #'
-#' This function generates coverage plots from BED files and saves the result in a PDF. 
-#' It reads coverage data from each BED file and plots them as line graphs with one graph by chromosme. 
+#' This function generates depth plots from BED files and saves the result in a PDF. 
+#' It reads depth data from each BED file and plots them as line graphs with one graph by chromosme. 
 #' You can provide multiple BED files from same reference.
 #' If opposite strand files are provided, they are plotted on an inverted y-axis.
 #'
-#' @param bed_files A character vector containing the paths to the BED files with coverage data. 
-#'                  Each file must have three columns: chromosome name, position, and coverage.
+#' @param bed_files A character vector containing the paths to the BED files with depth data. 
+#'                  Each file must have three columns: chromosome name, position, and depth.
 #' @param output_pdf The path to the output PDF file where the plots will be saved.
-#' @param plot_title The title of the plot. For example, can be the sample name. Default is "Coverage".
+#' @param plot_title The title of the plot. For example, can be the sample name. Default is "Depth".
 #' @param plot_legend A character vector containing names for the plots. If NULL, the function automatically generates names from the 'bed_files' file basenames.
 #' @param plot_colors A character vector of color codes or names for each plot. If NULL, colors are automatically assigned.
 #' @param bed_files_opposite_strand A character vector containing the paths to the BED files for the opposite strand. If NULL, no opposite strand data is plotted.
@@ -23,13 +23,13 @@ library(ggplot2)
 #'                 If NULL, all files are plotted on the primary axis by default.
 #' @param plot_alpha The transparency of the plot lines. Default is 0.5.
 #'
-#' @return This function does not return a value but generates and saves a PDF file with the coverage plots.
+#' @return This function does not return a value but generates and saves a PDF file with the depth plots.
 #' 
 #' @details
-#' This function plots coverage from simple BED files as input.
-#' Each BED file must contain three columns: the chromosome name, position, and coverage.
+#' This function plots depth from simple BED files as input.
+#' Each BED file must contain three columns: the chromosome name, position, and depth.
 #' Others formats (such as those with intervals) are not compatible.
-#' Coverage must not be negative (conflict with the representation of the opposite strand)
+#' Depth must not be negative (conflict with the representation of the opposite strand)
 #' 
 #' It accepts multiple BED files through the bed_files parameter, provided all the files
 #' contain the same chromosomes (to ensure they refer to the same genomic reference).
@@ -40,14 +40,14 @@ library(ggplot2)
 #' 
 #' Additional BED files can be provided through the bed_files_opposite_strand parameter.
 #' These files must also contain the same chromosomes as those in bed_files.
-#' The coverage from these files will be plotted as a mirror image on an inverted y-axis.
+#' The depth from these files will be plotted as a mirror image on an inverted y-axis.
 #'
 #' @examples
 #' # Example usage
-#' plot_multiple_bed_coverage(
+#' plot_multiple_bed_depth(
 #'   bed_files = c("gloabal_pos.bed", "only_R1_map_pos.bed", "only_improperly_pos.bed"),
 #'   bed_files_opposite_strand = c("gloabal_neg.bed", "only_R1_map_neg.bed", "only_improperly_neg.bed"),
-#'   output_pdf = "coverage_plot_sample_XX.pdf",
+#'   output_pdf = "depth_plot_sample_XX.pdf",
 #'   cov_axes = c(1, 2, 2),
 #'   plot_legend = c("all", "R1", "improperly"),
 #'   plot_colors = c("green", "red", "blue")
@@ -55,8 +55,8 @@ library(ggplot2)
 #' 
 #' @export
 
-plot_multiple_bed_coverage <- function(bed_files, output_pdf,
-                                 plot_title = "Coverage",
+plot_multiple_bed_depth <- function(bed_files, output_pdf,
+                                 plot_title = "Depth",
                                  plot_legend = NULL, plot_colors = NULL,
                                  bed_files_oposite_strand = NULL,
                                  cov_axes = NULL,
@@ -100,7 +100,7 @@ plot_multiple_bed_coverage <- function(bed_files, output_pdf,
     data
   })
   
-  # import opposite strand bed files if provided, set their color and inverse coverage
+  # import opposite strand bed files if provided, set their color and inverse depth
   if (!is.null(bed_files_oposite_strand)) {
     if (length(bed_files_oposite_strand) != length(bed_files)) {
       stop("Error: 'bed_files_oposite_strand' must have the same length as 'bed_files'")
@@ -144,7 +144,7 @@ plot_multiple_bed_coverage <- function(bed_files, output_pdf,
     p <- ggplot() +
       labs(title = plot_title,
            subtitle = paste0(chr,
-                             "\n(negative values correspond to the coverage of the given file as the opposite strand.)")) +
+                             "\n(negative values correspond to the depth of the given file as the opposite strand.)")) +
       geom_hline(yintercept = 0, color = "grey") +
       scale_color_manual(name = NULL,
                          values = setNames(plot_colors, plot_legend)) +
@@ -199,9 +199,9 @@ plot_multiple_bed_coverage <- function(bed_files, output_pdf,
       } else {
         secondary_axis_factor <- 1
       }
-      p <- p + scale_y_continuous(name = "Coverage", 
+      p <- p + scale_y_continuous(name = "Depth", 
                                   sec.axis = sec_axis(~ . / secondary_axis_factor,
-                                                      name = "Coverage\n(in dotted)"))
+                                                      name = "Depth\n(in dotted)"))
       # draw data on secondary_axis
       for (data in secondary_axis_data) {
         if (!is.null(data)) {
@@ -222,17 +222,17 @@ plot_multiple_bed_coverage <- function(bed_files, output_pdf,
 ## Help
 print_help <- function() {
   cat("
-Usage: plot_multiple_bed_coverage.R --bed_files=<input/bed_files_path_1,input/bed_files_path_2> --output_pdf=<out/dir/coverage.pdf> [options]
+Usage: plot_multiple_bed_depth.R --bed_files=<input/bed_files_path_1,input/bed_files_path_2> --output_pdf=<out/dir/depth.pdf> [options]
 
-Plot Coverage from BED Files to PDF
-This script generates coverage plots from BED files and saves the result in a PDF file.
+Plot Depth from BED Files to PDF
+This script generates depth plots from BED files and saves the result in a PDF file.
 It accepts multiple BED files from the same reference and supports opposite strand files.
-Each BED file must have three columns: chromosome name, position, and coverage.
+Each BED file must have three columns: chromosome name, position, and depth.
 
 Options:
-  --bed_files           Required. Comma-separated list of BED files with coverage data (no spaces).
+  --bed_files           Required. Comma-separated list of BED files with depth data (no spaces).
   --output_pdf          Required. Path to the output PDF file where the plots will be saved.
-  --plot_title          Optional. Title of the plot (default: 'Coverage').
+  --plot_title          Optional. Title of the plot (default: 'Depth').
   --plot_legend         Optional. Comma-separated list of names for the each line plot (default basename of '--bed_files')
   --plot_colors         Optional. Comma-separated list of color codes or names for each line plot.
   --bed_files_opposite  Optional. Comma-separated list of BED files for opposite strand.
@@ -240,7 +240,7 @@ Options:
   --plot_alpha          Optional. Transparency of plot lines (default: 0.4).
 
 Example:
-  ./plot_multiple_bed_coverage.R --bed_files=gloabal_pos.bed,only_R1_map_pos.bed --output_pdf=coverage.pdf --plot_legend='All,R1' --plot_colors='green,red'
+  ./plot_multiple_bed_depth.R --bed_files=gloabal_pos.bed,only_R1_map_pos.bed --output_pdf=depth.pdf --plot_legend='All,R1' --plot_colors='green,red'
 \n")
 }
 
@@ -286,8 +286,8 @@ if (is.null(bed_files) || is.null(output_pdf)) {
   quit("no", 1)
 }
 
-## Call plot_multiple_bed_coverage with args
-plot_multiple_bed_coverage(
+## Call plot_multiple_bed_depth with args
+plot_multiple_bed_depth(
   bed_files = bed_files,
   output_pdf = output_pdf,
   plot_title = plot_title,

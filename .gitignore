@@ -1,4 +1,4 @@
 /test/private/
-/test/input_sorted.bam
+/test/input_sorted.bam*
 /test/results/
-
+/scripts/save/
