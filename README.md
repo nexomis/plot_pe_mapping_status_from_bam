@@ -73,3 +73,26 @@ If opposite strand BED files are provided, these are displayed as a mirrored ima
 
 ##### Requirements:
  - `ggplot2` (on `R`)  
+
+
+#### bam_to_start_end_depth.py
+
+Compute read depth on alignment positions (first, last, or both) for each position in BAM file.
+
+##### Arguments:
+```
+positional arguments:
+  input_bam             Input BAM file
+  output_prefix         Output prefix for BED files
+
+options:
+  -h, --help            show this help message and exit
+  --pos {first,last,both}
+                        Compute depth on first alignment position, last, or both (default: last)
+```
+
+##### Usage
+  `bam_to_start_end_depth.py [-h] [--pos {first,last,both}] input_bam output_prefix`
+
+##### Requirements:
+ - `pysam` (on `python3`)  
