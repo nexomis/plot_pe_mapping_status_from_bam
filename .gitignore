@@ -1,4 +1,6 @@
 /test/private/
-/test/input_sorted.bam*
+/test/input*
 /test/results/
 /scripts/save/
+/Docker_img/
+/Rplots.pdf
