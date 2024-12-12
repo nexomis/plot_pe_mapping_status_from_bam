@@ -56,7 +56,7 @@ usage() {
     echo "    -max_pb_by_A4_width   Optional.  Maximum plot width in pixels for automatic page sizing (default: 5000)"
     echo "    -pos_min              Optional.  First position to consider for plot (if specified, applied for all chromosomes) (default: '0')"
     echo "    -pos_max              Optional.  Last position to consider for plot (if specified, applied to all chromosomes) (default: last position of each chromosome)"
-    echo "    -area                 Optional.  Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)
+    echo "    -area                 Optional.  Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)"
     echo ""
     echo "  >annot graph"
     echo "    -annot_gff_file                Optional. Path to input GFF file for annotation plotting (if provided) (default: NA)."
