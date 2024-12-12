@@ -15,6 +15,7 @@ set -e
 # Default values
 delete_bam_files="true"
 plot_title="Depth"
+min_x_graduation=200
 output_depth_pdf=""
 input_bam=""
 output_dir=""
@@ -25,10 +26,13 @@ annot_feat_id_catch="\\1"
 annot_interest_type="mRNA,CDS,transcript"
 annot_name_on_plot=FALSE
 relative_heigt_combined_plot="3,1"
+max_pb_by_A4_width=""
+pos_min=""
+pos_max=""
 
 # help
 usage() {
-    echo "Usage: $0 -i <input_bam> -o <output_dir> -c <output_bn_depth_pdf> [-d <delete_bam_files>] [-p <plot_title>]"
+    echo "Usage: $0 -input_bam <input_bam> -output_dir <output_dir> -output_bn_depth_pdf <output_bn_depth_pdf> [-d <delete_bam_files>] [-p <plot_title>]"
     echo ""
     echo "This script processes a BAM file to generate specific BED files (by calling of 'bam_to_mate_strand_bed.sh') and corresponding depth plots (by calling of 'plot_multiple_bed_depth.r')."
     echo ""
@@ -49,6 +53,8 @@ usage() {
     echo "    -min_x_graduation     Optional.  Minimum x-axis graduation in base pairs (default: 200)"
     echo "    -plotly_out_dir       Optional.  Directory to save individual chromosome plots as HTML (interactive Plotly plots) (if provided) (default: NA)"
     echo "    -max_pb_by_A4_width   Optional.  Maximum plot width in pixels for automatic page sizing (default: 5000)"
+    echo "    -pos_min              Optional.  First position to consider for plot (if specified, applied for all chromosomes) (default: '0')"
+    echo "    -pos_max              Optional.  Last position to consider for plot (if specified, applied to all chromosomes) (default: last position of each chromosome)"
     echo ""
     echo "  >annot graph"
     echo "    -annot_gff_file                Optional. Path to input GFF file for annotation plotting (if provided) (default: NA)."
@@ -67,7 +73,6 @@ count_level="read"
 delete_bam_files="true"
 plot_title="Depth"
 scripts_dir_path="./scripts/"
-#while getopts "i:o:l:d:p:c:s:" opt; do
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -input_bam) input_bam="$2"; shift ;;
@@ -80,6 +85,8 @@ while [[ "$#" -gt 0 ]]; do
         -plotly_out_dir) plotly_out_dir="$2"; shift ;;
         -annot_gff_file) annot_gff_file="$2"; shift ;;
         -max_pb_by_A4_width) max_pb_by_A4_width="$2"; shift ;;
+        -pos_min) pos_min="$2"; shift ;;
+        -pos_max) pos_max="$2"; shift ;;
         -min_x_graduation) min_x_graduation="$2"; shift ;;
         -annot_feat_id_regex) annot_feat_id_regex="$2"; shift ;;
         -annot_feat_id_catch) annot_feat_id_catch="$2"; shift ;;
@@ -118,9 +125,12 @@ echo "Generating depth plots from BED files..."
 static_plot_parameters='--depth_axes="2,1,1" --plot_legend="properly_map(first+second),only_first_map,only_second_map" --plot_colors="grey50,darkblue,darkred" --plot_alpha="0.4"'
 
 dynamic_plot_parameters=""
-if [ -n "$plotly_out_dir" ]; then
-    dynamic_plot_parameters+=" --plotly_out_dir=${plotly_out_dir}"
-fi
+if [ -n "$plotly_out_dir" ]; then dynamic_plot_parameters+=" --plotly_out_dir=${plotly_out_dir}"; fi
+if [ -n "$min_x_graduation" ]; then dynamic_plot_parameters+=" --min_x_graduation=${min_x_graduation}"; fi
+if [ -n "$max_pb_by_A4_width" ]; then dynamic_plot_parameters+=" --max_pb_by_A4_width=${max_pb_by_A4_width}"; fi
+if [ -n "$pos_min" ]; then dynamic_plot_parameters+=" --pos_min=${pos_min}"; fi
+if [ -n "$pos_max" ]; then dynamic_plot_parameters+=" --pos_max=${pos_max}"; fi
+
 if [ -n "$annot_gff_file" ]; then
     dynamic_plot_parameters+=" --annot_gff_file=\"${annot_gff_file}\" \
  --annot_feat_id_regex='${annot_feat_id_regex}' \

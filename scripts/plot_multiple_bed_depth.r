@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 
 ## Required packages
-library(ggplot2)
-library(dplyr)
-library(gggenomes)
-library(patchwork)
-library(cowplot)
-library(plotly)
-library(htmlwidgets)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
+suppressMessages(library(gggenomes))
+suppressMessages(library(patchwork))
+suppressMessages(library(cowplot))
+suppressMessages(library(plotly))
+suppressMessages(library(htmlwidgets))
 
 
 ## Define function
@@ -36,6 +36,8 @@ library(htmlwidgets)
 #' @param max_pb_by_A4_width Optional. Maximum plot width in pixels for automatic page sizing (default: 5000).
 #' @param min_x_graduation Optional. Minimum x-axis graduation in base pairs (default: 200).
 #' @param plotly_out_dir Optional. Directory to save individual chromosome plots as HTML (interactive Plotly plots) (if provided).
+#' @param pos_min Optional. Numeric value indicating the first genomic position to consider for plots (x-axis). Default is start at positioion 0. Same limit for all chr (TODO: render this limit chr specific).
+#' @param pos_max Optional. Numeric value indicating the last genomic position to consider for plots (x-axis). Default is last position of each chr in bed files (probbaly chr length). Same limit for all chr (TODO: render this limit chr specific).
 #'
 #' @return This function does not return a value but generates and saves a PDF/HTML files with depth plots.
 #' 
@@ -85,7 +87,9 @@ plot_multiple_bed_depth <- function(bed_files,
                                     relative_heigt_combined_plot = c(3, 1),
                                     max_pb_by_A4_width=5000,
                                     min_x_graduation=200,
-                                    plotly_out_dir = NULL) {
+                                    plotly_out_dir = NULL,
+                                    pos_min = NULL,
+                                    pos_max = NULL) {
   
   # determine value for some missing parameters
   if (is.null(plot_legend)) {
@@ -161,7 +165,10 @@ plot_multiple_bed_depth <- function(bed_files,
   }
   
   # pdf with page width relatif to max chr len (limit of max pb by width of A4 foramt)
-  max_chr_len <- max(tapply(bed_list[[1]]$pos, bed_list[[1]]$chr, max))
+  max_chr_len <-
+    (if (!is.null(pos_max)) pos_max 
+      else max(tapply(bed_list[[1]]$pos, bed_list[[1]]$chr, max))) - 
+    ifelse(!is.null(pos_min), pos_min, 0)
   base_page_width = 297/25.4  # A4 in inches
   nb_page = max(1, max_chr_len/max_pb_by_A4_width)
   max_width_page = base_page_width*nb_page
@@ -169,8 +176,11 @@ plot_multiple_bed_depth <- function(bed_files,
   
   # draw one plot by chr
   for (chr in chrs) {
-    chr_len <- max(bed_list[[1]]$pos[bed_list[[1]]$chr == chr])
-    
+    chr_start <- ifelse(!is.null(pos_min), pos_min, 0)
+    chr_end <- ifelse(!is.null(pos_max), pos_max,
+      max(bed_list[[1]]$pos[bed_list[[1]]$chr == chr]))
+    #chr_len <- max(bed_list[[1]]$pos[bed_list[[1]]$chr == chr])
+
     ## depth plot
 
     p_depth <- plot_depth_from_multiple_bed_data_and_signle_targeted_chr(chr = chr,
@@ -192,8 +202,8 @@ plot_multiple_bed_depth <- function(bed_files,
             axis.title.x = element_blank()) +
       scale_x_continuous(
         position = "top",
-        limits = c(0, chr_len),
-        breaks = seq(0, round_down_to_lower_power_of_ten(chr_len), by = min(round_down_to_lower_power_of_ten(chr_len)/25, min_x_graduation)),
+        limits = c(chr_start, chr_end),
+        breaks = seq(chr_start, round_down_to_lower_power_of_ten(chr_end), by = min(round_down_to_lower_power_of_ten(chr_end - chr_start)/25, min_x_graduation)),
         labels = scales::comma)
     
     # save depth plot on plotly format
@@ -237,8 +247,8 @@ plot_multiple_bed_depth <- function(bed_files,
               axis.text.x = element_text(angle = 90, vjust=0.5, hjust=1)) +
         labs(y = "Annotation") + 
         scale_x_continuous(
-          limits = c(0, chr_len),
-          breaks = seq(0, chr_len, by = min(round_down_to_lower_power_of_ten(chr_len)/25, min_x_graduation)),
+          limits = c(chr_start, chr_end),
+          breaks = seq(chr_start, chr_end, by = min(round_down_to_lower_power_of_ten(char_end - chr_start)/25, min_x_graduation)),
           labels = scales::comma
         )
       
@@ -249,7 +259,7 @@ plot_multiple_bed_depth <- function(bed_files,
       combined_plot <- p_depth +
         theme(plot.margin = margin(t = 1, r = 1, b = 1, l = 1, unit = "line"))
     }
-    width_ratio <- chr_len / max_chr_len
+    width_ratio <- (chr_end - chr_start) / max_chr_len
     aligned_plot <- ggdraw() +
       draw_plot(combined_plot, x = 0, y = 0, width = width_ratio, height = 1)
     
@@ -448,6 +458,8 @@ if (!interactive()) {
     --annot_interest_type          Optional. Feature types to include from GFF file (default: c('mRNA', 'CDS', 'transcript')).
     --annot_name_on_plot           Optional. Display feature names on plot (default: FALSE).
     --relative_heigt_combined_plot Optional. Relative heights of depth and annotation plots (default: c(3, 1)).
+    --pos_min                      Optional. Numeric value indicating the first genomic position to consider for plots (x-axis). Default is start at positioion 0. Same limit for all chr (TODO: render this limit chr specific).
+    --pos_max                      Optional. Numeric value indicating the last genomic position to consider for plots (x-axis). Default is last position of each chr in bed files (probbaly chr length). Same limit for all chr (TODO: render this limit chr specific).
     --max_pb_by_A4_width           Optional. Maximum page width in pixels for auto-sizing (default: 5000).
     --min_x_graduation             Optional. Minimum x-axis graduation in bp (default: 200).
     --plotly_out_dir               Optional. Directory to save individual chromosome plots as HTML (interactive).
@@ -490,6 +502,8 @@ if (!interactive()) {
   annot_interest_type <- parse_arg("--annot_interest_type", args)
   annot_name_on_plot <- parse_arg("--annot_name_on_plot", args)
   relative_heigt_combined_plot <- parse_arg("--relative_heigt_combined_plot", args)
+  pos_min <- parse_arg("--pos_min", args)
+  pos_max <- parse_arg("--pos_max", args)
   max_pb_by_A4_width <- parse_arg("--max_pb_by_A4_width", args)
   min_x_graduation <- parse_arg("--min_x_graduation", args)
   plotly_out_dir <- parse_arg("--plotly_out_dir", args) 
@@ -508,6 +522,8 @@ if (!interactive()) {
   annot_interest_type <- if (!is.null(annot_interest_type)) strsplit(annot_interest_type, ",")[[1]] else c("mRNA", "CDS", "transcript")
   annot_name_on_plot <- if (!is.null(annot_name_on_plot)) as.logical(annot_name_on_plot) else FALSE
   relative_heigt_combined_plot <- if (!is.null(relative_heigt_combined_plot)) as.numeric(strsplit(relative_heigt_combined_plot, ",")[[1]]) else c(3, 1)
+  pos_min <- if (!is.null(pos_min)) as.numeric(pos_min) else NULL
+  pos_max <- if (!is.null(pos_max)) as.numeric(pos_max) else NULL
   max_pb_by_A4_width <- if (!is.null(max_pb_by_A4_width)) as.numeric(max_pb_by_A4_width) else 5000
   min_x_graduation <- if (!is.null(min_x_graduation)) as.numeric(min_x_graduation) else 200
   plotly_out_dir <- if (!is.null(plotly_out_dir)) plotly_out_dir else NULL
@@ -535,6 +551,8 @@ if (!interactive()) {
     annot_interest_type = annot_interest_type,
     annot_name_on_plot = annot_name_on_plot,
     relative_heigt_combined_plot = relative_heigt_combined_plot,
+    pos_min = pos_min,
+    pos_max = pos_max,
     max_pb_by_A4_width = max_pb_by_A4_width,
     min_x_graduation = min_x_graduation,
     plotly_out_dir =plotly_out_dir
