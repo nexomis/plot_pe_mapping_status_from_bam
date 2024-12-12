@@ -32,7 +32,6 @@ RUN tar -xvzf ${REPO_NAME}.tar.gz \
 RUN cp -r ${REPO_NAME}-${COMMIT_HASH}/scripts /usr/src/${REPO_NAME}-${COMMIT_HASH} \
     && ln -s /usr/src/${REPO_NAME}-${COMMIT_HASH}/* /usr/local/bin/ \
     && rm -r ${REPO_NAME}-${COMMIT_HASH}/
-RUN chmod -R +x /usr/local/bin/${REPO_NAME}/
 
 # default rocker img run R as entrypoint
 CMD ["bash"]
