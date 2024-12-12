@@ -33,7 +33,7 @@ area="FALSE"
 
 # help
 usage() {
-    echo "Usage: $0 -input_bam <input_bam> -output_dir <output_dir> -output_bn_depth_pdf <output_bn_depth_pdf> [-d <delete_bam_files>] [-p <plot_title>]"
+    echo "Usage: $0 -input_bam <input_bam> -output_dir <output_dir> -output_bn_depth_pdf <output_bn_depth_pdf> [option(s)]"
     echo ""
     echo "This script processes a BAM file to generate specific BED files (by calling of 'bam_to_mate_strand_bed.sh') and corresponding depth plots (by calling of 'plot_multiple_bed_depth.r')."
     echo ""

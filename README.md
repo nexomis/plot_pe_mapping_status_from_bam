@@ -5,17 +5,36 @@ This script automates the process of:
  - Generating depth plots: After converting the BAM file, it runs `plot_multiple_bed_depth.r` script to generate depth plots from the resulting BED files, and saves the plots as a PDF. (recquires `ggplot2` on `r`)  
 
 ### Usage:
-  `./run_bam_to_bed_to_graph.sh --input_bam <input_bam> --output_dir <output_dir> [option(s)]`  
+  `./scripts/run_bam_to_bed_to_graph.sh -input_bam <input_bam> -output_dir <output_dir> -output_bn_depth_pdf <output_bn_depth_pdf> [option(s)]`  
 
 ### Arguments:
 ```
-  -i <input_bam>           Recquired. Path to the input BAM file. Must be sorted by coordinates (mandatory)  
-  -o <output_dir>          Recquired. Path to the output directory for BED files and plots (mandatory)  
-  -c <output_bn_cov_pdf>   Recquired. Base name to the output PDF file for depth plots (mandatory)  
-  -d <delete_bam_files>    Optional. true|false Whether to delete BAM files after processing (default: true)  
-  -p <plot_title>          Optional. Title for the depth plots (default: 'Depth')  
-  -l <count_level>         Optional. Depth count level: consider the entire reads ['read'] or simply the last aligned position of the reads ['position'] (last in the context of the last cycle of the read, i.e. the closest to the other mate for fr or rf libraries when inner distance is positive) (default: read).  
-  -s <scripts_dir_path>    Optional. Path of scripts directories. Must contains 'bam_to_mate_strand_bed.sh', 'plot_multiple_bed_depth.r' and 'bam_to_start_end_depth.py' (default: ./scripts/).  
+  >global
+    -input_bam         Recquired. Path to the input BAM file. Must be sorted by coordinates.
+    -output_dir        Recquired. Path to the output directory for BED files and plots.
+    -scripts_dir_path  Optional.  Path of scripts directories if not in PATH. Must contains 'bam_to_mate_strand_bed.sh', 'plot_multiple_bed_depth.r' and 'bam_to_start_end_depth.py' (default: NULL).
+
+  >depth calculation
+    -count_level       Optional.  Depth count level: consider the entire reads ['read'] or simply the last aligned position of the reads ['position'] (last in the context of the last cycle of the read, i.e. the closest to the other mate for fr or rf libraries when inner distance is positive). (default: read)
+    -delete_bam_files  Optional.  true|false Whether to delete BAM files after processing (default: true).
+
+  >depth graph
+    -plot_title           Optional.  Title for the depth plots (default: 'Depth').
+    -output_bn_depth_pdf  Recquired. Base name to the output PDF file for depth plots.
+    -min_x_graduation     Optional.  Minimum x-axis graduation in base pairs (default: 200)
+    -plotly_out_dir       Optional.  Directory to save individual chromosome plots as HTML (interactive Plotly plots) (if provided) (default: NA)
+    -max_pb_by_A4_width   Optional.  Maximum plot width in pixels for automatic page sizing (default: 5000)
+    -pos_min              Optional.  First position to consider for plot (if specified, applied for all chromosomes) (default: '0')
+    -pos_max              Optional.  Last position to consider for plot (if specified, applied to all chromosomes) (default: last position of each chromosome)
+    -area                 Optional.  Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)
+
+  >annot graph
+    -annot_gff_file                Optional. Path to input GFF file for annotation plotting (if provided) (default: NA).
+    -annot_feat_id_regex           Optional. Pattern (sub) to extract feature ID from the GFF attributes (default: '.*Target=([^; ]+).*').
+    -annot_feat_id_catch           Optional. Replacement (sub) for the feature ID (default: '\1').
+    -annot_interest_type           Optional. Vector of feature types to include (default: 'mRNA,CDS,transcript').
+    -annot_name_on_plot            Optional. Logical; displays feature names on the plot (default: FALSE)
+    -relative_heigt_combined_plot  Optional. Relative heights for the combined depth and annotation plot (default: '3,1').
 ```    
   
 ### Modules
