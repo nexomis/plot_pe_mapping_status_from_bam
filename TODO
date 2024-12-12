@@ -3,7 +3,7 @@
  - quit R library loading ?
  - avoid 'Rplots.pdf' generated on current_dir
  - all posiiton af sequence length is considered: not only covered region SO, NOT ONLY POSITION ON BAM IN CASE WHERE BAM IS SUBSETED ON SPECIFIC REGION: manage-it by keep only specific region (new option) on all bed files and/or on R script (xscales) [impat for plotly ?]
-    => fixed using xlimit of plot on r script, better to manage it at samtools step in order to avoir useless computing time and warning() du to undiplayed data
+    => fixed using xlimit of plot on r script, better to manage it at samtools step in order to avoir useless computing time and warning() du to undiplayed data OR, if conserve approche of manage by x-axis limit, manage case where submit different region (same or different chromosome), one region by page.
  - add warning to alert thath visualisation is not adapted for large sequence
 
  - if area instead of line: impossible to split primary and secondary axis using line_type (dotted or not) => notice it in legend name

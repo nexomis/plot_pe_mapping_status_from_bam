@@ -197,6 +197,8 @@ plot_multiple_bed_depth <- function(bed_files,
       geom_hline(yintercept = 0, color = "grey") +
       scale_color_manual(name = NULL,
                          values = setNames(plot_colors, plot_legend)) +
+      scale_fill_manual(name = NULL,
+                         values = setNames(plot_colors, plot_legend)) +
       theme_bw() +
       theme(panel.border = element_blank(),
             plot.margin = margin(t = 1, r = 1, b = 0, l = 1, unit = "line"),
