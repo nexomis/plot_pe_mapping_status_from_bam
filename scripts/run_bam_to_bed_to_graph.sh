@@ -142,7 +142,12 @@ if [ -n "$annot_gff_file" ]; then
  --relative_heigt_combined_plot=\"${relative_heigt_combined_plot}\""
 fi
 
-echo "Rscript ${scripts_dir_path}plot_multiple_bed_depth.r \
+if [ -n "$scripts_dir_path" ]; then
+    r_script_path="${scripts_dir_path}plot_multiple_bed_depth.r"
+else
+    r_script_path=$(which plot_multiple_bed_depth.r)
+fi
+echo "Rscript ${r_script_path} \
   --bed_files=\"${output_dir}/properly_map_by_strand/properly_map_first_and_second_in_reverse.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_first_map_in_reverse.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_second_map_in_reverse.bed\" \
   --bed_files_opposite=\"${output_dir}/properly_map_by_strand/properly_map_first_and_second_in_strand.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_first_map_in_strand.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_second_map_in_strand.bed\" \
   --output_pdf_bn=\"${output_dir}/${output_bn_depth_pdf}\" \
