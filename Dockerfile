@@ -25,7 +25,7 @@ RUN Rscript -e "install.packages('BiocManager')" \
 
 # copy scripts from specific commit repository
 ENV REPO_NAME=plot_pe_mapping_status_from_bam
-ENV COMMIT_HASH=db1f9a6187e88972b8f9745b15b54a39ad88c5a4
+ENV COMMIT_HASH=f08c946d9e21f7be23a61459d5630c66d2436fad
 RUN wget -O ${REPO_NAME}.tar.gz https://github.com/nexomis/${REPO_NAME}/archive/${COMMIT_HASH}.tar.gz
 RUN tar -xvzf ${REPO_NAME}.tar.gz \
     && rm ${REPO_NAME}.tar.gz
