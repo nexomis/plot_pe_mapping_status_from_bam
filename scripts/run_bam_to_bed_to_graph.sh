@@ -74,7 +74,7 @@ usage() {
 count_level="read"
 delete_bam_files="true"
 plot_title="Depth"
-scripts_dir_path="./scripts/"
+scripts_dir_path=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -input_bam) input_bam="$2"; shift ;;
