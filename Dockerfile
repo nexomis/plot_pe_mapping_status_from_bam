@@ -29,7 +29,7 @@ ENV COMMIT_HASH=f08c946d9e21f7be23a61459d5630c66d2436fad
 RUN wget -O ${REPO_NAME}.tar.gz https://github.com/nexomis/${REPO_NAME}/archive/${COMMIT_HASH}.tar.gz
 RUN tar -xvzf ${REPO_NAME}.tar.gz \
     && rm ${REPO_NAME}.tar.gz
-RUN cp -r ${REPO_NAME}-${COMMIT_HASH}/scripts/* /usr/src/${REPO_NAME}-${COMMIT_HASH}/ \
+RUN cp -r ${REPO_NAME}-${COMMIT_HASH}/scripts /usr/src/${REPO_NAME}-${COMMIT_HASH} \
     && ln -s /usr/src/${REPO_NAME}-${COMMIT_HASH}/* /usr/local/bin/ \
     && rm -r ${REPO_NAME}-${COMMIT_HASH}/
 RUN chmod -R +x /usr/local/bin/${REPO_NAME}/
