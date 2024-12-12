@@ -29,6 +29,7 @@ relative_heigt_combined_plot="3,1"
 max_pb_by_A4_width=""
 pos_min=""
 pos_max=""
+area="FALSE"
 
 # help
 usage() {
@@ -55,6 +56,7 @@ usage() {
     echo "    -max_pb_by_A4_width   Optional.  Maximum plot width in pixels for automatic page sizing (default: 5000)"
     echo "    -pos_min              Optional.  First position to consider for plot (if specified, applied for all chromosomes) (default: '0')"
     echo "    -pos_max              Optional.  Last position to consider for plot (if specified, applied to all chromosomes) (default: last position of each chromosome)"
+    echo "    -area                 Optional.  Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)
     echo ""
     echo "  >annot graph"
     echo "    -annot_gff_file                Optional. Path to input GFF file for annotation plotting (if provided) (default: NA)."
@@ -87,6 +89,7 @@ while [[ "$#" -gt 0 ]]; do
         -max_pb_by_A4_width) max_pb_by_A4_width="$2"; shift ;;
         -pos_min) pos_min="$2"; shift ;;
         -pos_max) pos_max="$2"; shift ;;
+        -area) area="$2"; shift ;;
         -min_x_graduation) min_x_graduation="$2"; shift ;;
         -annot_feat_id_regex) annot_feat_id_regex="$2"; shift ;;
         -annot_feat_id_catch) annot_feat_id_catch="$2"; shift ;;
@@ -126,7 +129,6 @@ static_plot_parameters='--depth_axes="2,1,1" --plot_legend="properly_map(first+s
 
 dynamic_plot_parameters=""
 if [ -n "$plotly_out_dir" ]; then dynamic_plot_parameters+=" --plotly_out_dir=${plotly_out_dir}"; fi
-if [ -n "$min_x_graduation" ]; then dynamic_plot_parameters+=" --min_x_graduation=${min_x_graduation}"; fi
 if [ -n "$max_pb_by_A4_width" ]; then dynamic_plot_parameters+=" --max_pb_by_A4_width=${max_pb_by_A4_width}"; fi
 if [ -n "$pos_min" ]; then dynamic_plot_parameters+=" --pos_min=${pos_min}"; fi
 if [ -n "$pos_max" ]; then dynamic_plot_parameters+=" --pos_max=${pos_max}"; fi
@@ -145,6 +147,8 @@ echo "Rscript ${scripts_dir_path}plot_multiple_bed_depth.r \
   --bed_files_opposite=\"${output_dir}/properly_map_by_strand/properly_map_first_and_second_in_strand.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_first_map_in_strand.bed,${output_dir}/single_mate_map_by_mate_and_strand/only_second_map_in_strand.bed\" \
   --output_pdf_bn=\"${output_dir}/${output_bn_depth_pdf}\" \
   --plot_title=\"${plot_title}\" \
+  --min_x_graduation=\"${min_x_graduation}\" \
+  --area=\"${area}\" \
   ${static_plot_parameters} \
   ${dynamic_plot_parameters}" | bash
 

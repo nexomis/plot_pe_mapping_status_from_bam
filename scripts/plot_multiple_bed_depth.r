@@ -38,6 +38,7 @@ suppressMessages(library(htmlwidgets))
 #' @param plotly_out_dir Optional. Directory to save individual chromosome plots as HTML (interactive Plotly plots) (if provided).
 #' @param pos_min Optional. Numeric value indicating the first genomic position to consider for plots (x-axis). Default is start at positioion 0. Same limit for all chr (TODO: render this limit chr specific).
 #' @param pos_max Optional. Numeric value indicating the last genomic position to consider for plots (x-axis). Default is last position of each chr in bed files (probbaly chr length). Same limit for all chr (TODO: render this limit chr specific).
+#' @param area Optional. Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)
 #'
 #' @return This function does not return a value but generates and saves a PDF/HTML files with depth plots.
 #' 
@@ -89,7 +90,8 @@ plot_multiple_bed_depth <- function(bed_files,
                                     min_x_graduation=200,
                                     plotly_out_dir = NULL,
                                     pos_min = NULL,
-                                    pos_max = NULL) {
+                                    pos_max = NULL,
+                                    area = FALSE) {
   
   # determine value for some missing parameters
   if (is.null(plot_legend)) {
@@ -339,9 +341,15 @@ plot_depth_from_multiple_bed_data_and_signle_targeted_chr <- function(p = ggplot
   # draw data on primary_axis
   for (data in primary_axis_data) {
     if (!is.null(data)) {
-      p <- p + geom_line(data = data,
-                         aes(x = pos, y = depth, color = color),
-                         linewidth = 1, alpha = plot_alpha)
+      if (area) {
+        p <- p + geom_area(data = data,
+                          aes(x = pos, y = depth, fill = color),
+                          alpha = plot_alpha)
+      } else {
+        p <- p + geom_line(data = data,
+                          aes(x = pos, y = depth, color = color),
+                          linewidth = 1, alpha = plot_alpha)
+      }
     }
   }
   
@@ -353,10 +361,11 @@ plot_depth_from_multiple_bed_data_and_signle_targeted_chr <- function(p = ggplot
     } else {
       secondary_axis_factor <- 1
     }
+    sec_axis_name <- ifelse(area, "Depth", "Depth\n(in dotted)")
     p <- p + scale_y_continuous(name = "Depth", 
                                 sec.axis = sec_axis(
                                   transform = ~ . / secondary_axis_factor,
-                                  name = "Depth\n(in dotted)",
+                                  name = sec_axis_name,
                                   breaks = seq(if (length(bed_opposite_list) == 0) 0 else -max(round_down_to_lower_power_of_ten(max_depth_secondary), 30),
                                                max(round_down_to_lower_power_of_ten(max_depth_secondary), 30),
                                                by=max(round_down_to_lower_power_of_ten(max_depth_secondary)/10, 5)),
@@ -370,9 +379,15 @@ plot_depth_from_multiple_bed_data_and_signle_targeted_chr <- function(p = ggplot
     # draw data on secondary_axis
     for (data in secondary_axis_data) {
       if (!is.null(data)) {
-        p <- p + geom_line(data = data,
-                           aes(x = pos, y = depth * secondary_axis_factor, color = color),
-                           linewidth = 1, linetype = "dotted", alpha = plot_alpha)
+        if (area) {
+          p <- p + geom_area(data = data,
+                            aes(x = pos, y = depth * secondary_axis_factor, fill = color),
+                            alpha = plot_alpha)
+        } else {
+          p <- p + geom_line(data = data,
+                            aes(x = pos, y = depth * secondary_axis_factor, color = color),
+                            linewidth = 1, linetype = "dotted", alpha = plot_alpha)
+        }
       }
     }
   } else {
@@ -450,7 +465,7 @@ if (!interactive()) {
     --plot_legend                  Optional. Names for each line plot (default: file names in '--bed_files').
     --plot_colors                  Optional. Color codes or names for each plot.
     --bed_files_opposite           Optional. Comma-separated list of BED files for opposite strand data.
-    --depth_axes                   Optional. Axis for each BED file (1 for primary (line), 2 for secondary (dotted)).
+    --depth_axes                   Optional. Axis for each BED file (if not 'area': 1 for primary (line), 2 for secondary (dotted)).
     --plot_alpha                   Optional. Transparency of plot lines (default: 0.4).
     --annot_gff_file               Optional. Path to GFF file for annotation.
     --annot_feat_id_regex          Optional. Regex to extract feature ID from GFF attributes (default: '.*Target=([^; ]+).*').
@@ -463,6 +478,7 @@ if (!interactive()) {
     --max_pb_by_A4_width           Optional. Maximum page width in pixels for auto-sizing (default: 5000).
     --min_x_graduation             Optional. Minimum x-axis graduation in bp (default: 200).
     --plotly_out_dir               Optional. Directory to save individual chromosome plots as HTML (interactive).
+    --area                         Optional. Boolean. If 'TRUE', draw depth graphics using 'geom_area()' instead of 'geom_line()'. (default: FALSE)
   
   Example:
     ./plot_multiple_bed_depth.R --bed_files=gloabal_pos.bed,only_R1_map_pos.bed --output_pdf_bn=depth.pdf --plot_legend='All,R1' --plot_colors='green,red' --plotly_out_dir=plotly_chromosome_plots
@@ -507,7 +523,8 @@ if (!interactive()) {
   max_pb_by_A4_width <- parse_arg("--max_pb_by_A4_width", args)
   min_x_graduation <- parse_arg("--min_x_graduation", args)
   plotly_out_dir <- parse_arg("--plotly_out_dir", args) 
-  
+  area <- parse_arg("--area", args)
+
   # format args and default value
   bed_files <- if (!is.null(bed_files)) strsplit(bed_files, ",")[[1]] else NULL
   plot_legend <- if (!is.null(plot_legend)) strsplit(plot_legend, ",")[[1]] else NULL
@@ -527,7 +544,8 @@ if (!interactive()) {
   max_pb_by_A4_width <- if (!is.null(max_pb_by_A4_width)) as.numeric(max_pb_by_A4_width) else 5000
   min_x_graduation <- if (!is.null(min_x_graduation)) as.numeric(min_x_graduation) else 200
   plotly_out_dir <- if (!is.null(plotly_out_dir)) plotly_out_dir else NULL
-  
+  area <- if (!is.null(area)) as.logical(area) else FALSE
+
   ## check args
   if (is.null(bed_files) || is.null(output_pdf_bn)) {
     cat("Error: '--bed_files' and '--output_pdf_bn' are required (use '=' to asign value to parameter)\n")
@@ -555,6 +573,7 @@ if (!interactive()) {
     pos_max = pos_max,
     max_pb_by_A4_width = max_pb_by_A4_width,
     min_x_graduation = min_x_graduation,
-    plotly_out_dir =plotly_out_dir
+    plotly_out_dir = plotly_out_dir,
+    area = area
   )
 }

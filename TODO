@@ -6,7 +6,7 @@
     => fixed using xlimit of plot on r script, better to manage it at samtools step in order to avoir useless computing time and warning() du to undiplayed data
  - add warning to alert thath visualisation is not adapted for large sequence
 
- - area instead of line (but impossible to split primary and secondary axis ! notice it in legen name?)
+ - if area instead of line: impossible to split primary and secondary axis using line_type (dotted or not) => notice it in legend name
  - min and max y depend only of good strand
  - reduce breacks ?
  - log by pretreatment ? of easy to manage it directly on graph ?
