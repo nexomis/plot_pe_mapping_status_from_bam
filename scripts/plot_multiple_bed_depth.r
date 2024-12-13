@@ -292,8 +292,8 @@ round_down_to_lower_power_of_ten <- function(n) {
 
 
 # Calculate round breaks: usefull when 'start' is not necessarily a round number
-generate_round_breaks <- function(start, end, min_x_graduation) {
-  step <- min(round_down_to_lower_power_of_ten(chr_end - chr_start)/25, min_x_graduation)
+generate_round_breaks <- function(start, end, min_graduation) {
+  step <- min(round_down_to_lower_power_of_ten(end - start)/25, min_graduation)
   rounded_start <- ceiling(start / step) * step
   rounded_end <- floor(end / step) * step
   return(seq(rounded_start, rounded_end, by = step))
