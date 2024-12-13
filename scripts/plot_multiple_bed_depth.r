@@ -207,7 +207,7 @@ plot_multiple_bed_depth <- function(bed_files,
       scale_x_continuous(
         position = "top",
         limits = c(chr_start, chr_end),
-        breaks = seq(chr_start, round_down_to_lower_power_of_ten(chr_end), by = min(round_down_to_lower_power_of_ten(chr_end - chr_start)/25, min_x_graduation)),
+        breaks = generate_round_breaks(chr_start, chr_end, min_x_graduation),
         labels = scales::comma)
     
     # save depth plot on plotly format
@@ -252,7 +252,7 @@ plot_multiple_bed_depth <- function(bed_files,
         labs(y = "Annotation") + 
         scale_x_continuous(
           limits = c(chr_start, chr_end),
-          breaks = seq(chr_start, chr_end, by = min(round_down_to_lower_power_of_ten(char_end - chr_start)/25, min_x_graduation)),
+          breaks = generate_round_breaks(chr_start, chr_end, min_x_graduation),
           labels = scales::comma
         )
       
@@ -286,6 +286,17 @@ plot_multiple_bed_depth <- function(bed_files,
 round_down_to_lower_power_of_ten <- function(n) {
   power_of_ten <- 10^(floor(log10(n)) - 1)
   return(round(n / power_of_ten) * power_of_ten)
+}
+
+
+
+
+# Calculate round breaks: usefull when 'start' is not necessarily a round number
+generate_round_breaks <- function(start, end, min_x_graduation) {
+  step <- min(round_down_to_lower_power_of_ten(chr_end - chr_start)/25, min_x_graduation)
+  rounded_start <- ceiling(start / step) * step
+  rounded_end <- floor(end / step) * step
+  return(seq(rounded_start, rounded_end, by = step))
 }
 
 
